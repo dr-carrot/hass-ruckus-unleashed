@@ -8,6 +8,7 @@ from typing import Any
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -63,6 +64,9 @@ class RuckusWlanSwitch(CoordinatorEntity[RuckusDataUpdateCoordinator], SwitchEnt
         self._wlan_id = wlan["id"]
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{self._wlan_id}"
         self._attr_name = wlan["name"]
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, coordinator.config_entry.entry_id)},
+        )
 
     @property
     def _wlan(self) -> dict[str, Any] | None:

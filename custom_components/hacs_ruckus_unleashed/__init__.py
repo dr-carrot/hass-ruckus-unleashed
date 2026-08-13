@@ -26,6 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _register_ap_devices(hass, entry, coordinator)
 
     _register_aps()
+    _register_controller_device(hass, entry)
     remove_aps_listener = coordinator.async_add_listener(_register_aps)
     entry.async_on_unload(remove_aps_listener)
 
@@ -50,6 +51,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
+
+
+def _register_controller_device(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Create one Home Assistant device representing the Unleashed controller."""
+    device_registry = dr.async_get(hass)
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, entry.entry_id)},
+        manufacturer=MANUFACTURER,
+        name=entry.title,
+        model="Unleashed Controller",
+    )
 
 
 def _register_ap_devices(
