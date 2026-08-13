@@ -1,33 +1,20 @@
 # Ruckus Unleashed for Home Assistant
 
-A small custom integration that lets you control your **Ruckus Unleashed** Wi-Fi networks from Home Assistant.
+A custom Home Assistant integration that lets you control your **Ruckus Unleashed** Wi-Fi networks.
 
-It complements the built-in Home Assistant Ruckus integration: it adds the one thing that is missing for automation — **switching individual WLANs (SSIDs) on and off**.
+It complements the built-in Home Assistant Ruckus integration: it adds what's missing for automation — switching individual WLANs (SSIDs) on and off.
 
-## What it does
+## Features
 
-Each WLAN on your Ruckus Unleashed controller becomes a Home Assistant **switch**:
-
-```text
-switch.main_wifi
-switch.iot_wifi
-switch.guest_wifi
-```
-
-Turning a switch on or off enables/disables that WLAN across your whole Unleashed deployment. You can then use it in automations:
-
-```yaml
-action:
-  - action: switch.turn_off
-    target:
-      entity_id: switch.guest_wifi
-```
-
-Each physical access point is also registered as a Home Assistant **device** (identified by serial number), so you can see your AP fleet in the UI.
+- Enable / disable individual WLANs as Home Assistant **switches**
+- One Home Assistant **device** per physical access point (serial number, model, firmware)
+- Configurable polling interval (default 60 s, minimum 10 s)
+- SSL verification toggle for self-signed certificates
+- Automatic re-authentication when controller credentials change
 
 ## Requirements
 
-- Home Assistant (the integration uses the `aioruckus` library)
+- Home Assistant
 - A Ruckus Unleashed controller reachable over HTTP/HTTPS
 
 ## Installation
@@ -42,7 +29,9 @@ Each physical access point is also registered as a Home Assistant **device** (id
 
 Copy the `custom_components/ruckus_unleashed` directory into your Home Assistant `config/custom_components/` directory, then restart Home Assistant.
 
-## Setup
+## Configuration
+
+### Adding the integration
 
 1. Go to **Settings → Devices & services → Add integration**.
 2. Search for **Ruckus Unleashed**.
@@ -63,23 +52,43 @@ After setup you can adjust, without re-adding the integration:
 
 Under **Settings → Devices & services**, select the integration and **Options**.
 
-## Re-authentication
+### Re-authentication
 
 If your controller credentials change, the integration will prompt you to re-enter them (the same *Username* / *Password* form appears automatically).
 
-## Supported features
+## Entities
 
-- One switch per WLAN, reflecting the controller's actual enabled/disabled state
-- Enable / disable WLANs
-- One Home Assistant device per physical AP (serial number, model, firmware)
-- Automatic credential re-auth flow
-- Configurable polling interval
-- SSL verification toggle for self-signed certificates
+### WLAN switches
 
-## Not included (by design)
+Each WLAN on your controller becomes a switch that reflects the controller's actual enabled/disabled state:
 
-- Client / device tracking — the native Ruckus integration already handles this.
-- WLAN statistics, AP control/reboot, WLAN password management, or WLAN create/edit/delete.
+```text
+switch.main_wifi
+switch.iot_wifi
+switch.guest_wifi
+```
+
+Turning a switch on or off enables/disables that WLAN across your whole Unleashed deployment. Use it in automations:
+
+```yaml
+action:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.guest_wifi
+```
+
+Available attributes: `ssid`, `is_guest`, `encryption`.
+
+### Access points
+
+Each physical access point is registered as a Home Assistant device, identified by serial number, with model and firmware metadata:
+
+```text
+Ruckus Unleashed
+├── AP - Office
+├── AP - Living Room
+└── AP - Basement
+```
 
 ## Troubleshooting
 
@@ -93,9 +102,13 @@ If your controller credentials change, the integration will prompt you to re-ent
 - The controller could not be reached on the last poll. Check the connection and that the controller is online.
 - A WLAN that no longer exists on the controller also becomes unavailable rather than being deleted immediately.
 
-### Enable/disable state is inverted
+### Enable/disable state seems inverted
 
-`aioruckus` reports a WLAN's state through the `enable-type` field, where `0` means enabled and `1` means disabled. The integration follows that convention. If you believe a switch's on/off state does not match what your controller reports, enable debug logging and open an issue:
+`aioruckus` reports a WLAN's state through the `enable-type` field, where `0` means enabled and `1` means disabled. The integration follows that convention.
+
+### Debug logging
+
+If something isn't behaving, enable debug logging and open an issue:
 
 ```yaml
 logger:
