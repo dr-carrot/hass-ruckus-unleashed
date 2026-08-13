@@ -26,8 +26,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _register_ap_devices(hass, entry, coordinator)
 
     _register_aps()
-    coordinator.async_add_listener(_register_aps)
-    entry.async_on_unload(coordinator.async_remove_listener(_register_aps))
+    remove_aps_listener = coordinator.async_add_listener(_register_aps)
+    entry.async_on_unload(remove_aps_listener)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

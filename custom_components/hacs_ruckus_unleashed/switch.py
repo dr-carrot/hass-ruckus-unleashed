@@ -47,8 +47,8 @@ async def async_setup_entry(
         )
 
     _discover()
-    coordinator.async_add_listener(_discover)
-    entry.async_on_unload(coordinator.async_remove_listener(_discover))
+    remove_discover_listener = coordinator.async_add_listener(_discover)
+    entry.async_on_unload(remove_discover_listener)
 
 
 class RuckusWlanSwitch(CoordinatorEntity[RuckusDataUpdateCoordinator], SwitchEntity):
