@@ -1,6 +1,6 @@
-# Ruckus Unleashed WLANs for Home Assistant
+# Ruckus Unleashed (HACS) for Home Assistant
 
-A custom Home Assistant integration that lets you control the **WLANs** of your **Ruckus Unleashed** Wi-Fi networks.
+A custom Home Assistant integration that lets you control your **Ruckus Unleashed** Wi-Fi networks.
 
 It complements the **built-in** Home Assistant Ruckus integration (`ruckus_unleashed`): it adds what's missing for automation — switching individual WLANs (SSIDs) on and off.
 
@@ -34,7 +34,7 @@ Copy the `custom_components/hacs_ruckus_unleashed` directory into your Home Assi
 ### Adding the integration
 
 1. Go to **Settings → Devices & services → Add integration**.
-2. Search for **Ruckus Unleashed WLANs**.
+2. Search for **Ruckus Unleashed (HACS)**.
 3. Enter:
    - **Controller hostname or IP address**
    - **Username** (controller admin login)
