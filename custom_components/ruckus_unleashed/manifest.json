@@ -1,0 +1,10 @@
+{
+  "domain": "ruckus_unleashed",
+  "name": "Ruckus Unleashed",
+  "after_dependencies": ["aiohttp"],
+  "codeowners": [],
+  "config_flow": true,
+  "iot_class": "local_polling",
+  "requirements": ["aioruckus>=0.43"],
+  "version": "0.1.0"
+}

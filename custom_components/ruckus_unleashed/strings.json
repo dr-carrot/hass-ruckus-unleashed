@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ruckus Unleashed",
+        "description": "Connect to your Ruckus Unleashed controller.",
+        "data": {
+          "host": "Controller hostname or IP address",
+          "username": "Username",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        }
+      },
+      "reauth": {
+        "title": "Ruckus Unleashed",
+        "description": "Authentication failed. Please update your credentials.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the controller. Check the address and SSL settings.",
+      "invalid_auth": "Invalid username or password.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "reauth_successful": "Credentials updated successfully."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ruckus Unleashed",
+        "description": "Configure polling and connection options.",
+        "data": {
+          "verify_ssl": "Verify SSL certificate",
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  }
+}
