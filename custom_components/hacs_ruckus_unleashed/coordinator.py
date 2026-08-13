@@ -155,21 +155,31 @@ class RuckusDataUpdateCoordinator(DataUpdateCoordinator[RuckusData]):
 
     async def async_enable_wlan(self, name: str) -> None:
         """Enable a WLAN by name, then refresh immediately."""
-        await self._async_wlan_command("do_enable_wlan", name)
+        await self._async_command("do_enable_wlan", name, "WLAN")
 
     async def async_disable_wlan(self, name: str) -> None:
         """Disable a WLAN by name, then refresh immediately."""
-        await self._async_wlan_command("do_disable_wlan", name)
+        await self._async_command("do_disable_wlan", name, "WLAN")
 
-    async def _async_wlan_command(self, command: str, name: str) -> None:
-        """Run a WLAN command and refresh, translating failures to HA errors."""
+    async def async_show_ap_leds(self, mac: str) -> None:
+        """Show an AP's LEDs, then refresh immediately."""
+        await self._async_command("do_show_ap_leds", mac, "AP LED")
+
+    async def async_hide_ap_leds(self, mac: str) -> None:
+        """Hide an AP's LEDs, then refresh immediately."""
+        await self._async_command("do_hide_ap_leds", mac, "AP LED")
+
+    async def _async_command(
+        self, command: str, target: str, label: str
+    ) -> None:
+        """Run a command and refresh, translating failures to HA errors."""
         try:
-            await self._async_fetch(command, (name,))
+            await self._async_fetch(command, (target,))
         except ConfigEntryAuthFailed:
             raise
         except (UpdateFailed, ValueError, RuntimeError) as err:
             raise HomeAssistantError(
                 f"Failed to {command.replace('do_', '').replace('_', ' ')} "
-                f"WLAN {name}: {err}"
+                f"{label} {target}: {err}"
             ) from err
         await self.async_request_refresh()
