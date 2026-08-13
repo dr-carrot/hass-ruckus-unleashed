@@ -1,7 +1,5 @@
 {
   "name": "Ruckus Unleashed",
   "render_readme": true,
-  "iot_class": "local_polling",
-  "domains": ["switch"],
   "content_in_root": true
 }
