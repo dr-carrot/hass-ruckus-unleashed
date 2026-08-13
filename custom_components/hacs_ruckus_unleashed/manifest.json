@@ -1,6 +1,6 @@
 {
-  "domain": "ruckus_unleashed",
-  "name": "Ruckus Unleashed",
+  "domain": "hacs_ruckus_unleashed",
+  "name": "Ruckus Unleashed WLANs",
   "after_dependencies": ["aiohttp"],
   "codeowners": [],
   "config_flow": true,

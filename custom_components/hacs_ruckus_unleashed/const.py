@@ -1,6 +1,6 @@
 """Constants for the Ruckus Unleashed integration."""
 
-DOMAIN = "ruckus_unleashed"
+DOMAIN = "hacs_ruckus_unleashed"
 
 PLATFORMS = ["switch"]
 
