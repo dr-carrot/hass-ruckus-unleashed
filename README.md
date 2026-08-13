@@ -8,7 +8,7 @@ It complements the **built-in** Home Assistant Ruckus integration (`ruckus_unlea
 
 - Enable / disable individual WLANs as Home Assistant **switches**
 - One Home Assistant **device** per physical access point (serial number, model, firmware)
-- Show / hide an AP's LEDs via **buttons** (e.g. to turn off blinking LEDs at night)
+- Show / hide an AP's LEDs via a **switch** (e.g. to turn off blinking LEDs at night)
 - Configurable polling interval (default 60 s, minimum 10 s)
 - SSL verification toggle for self-signed certificates
 - Automatic re-authentication when controller credentials change
@@ -80,14 +80,15 @@ action:
 
 Available attributes: `ssid`, `is_guest`, `encryption`.
 
-### AP LED buttons
+### AP LED switches
 
-Each physical access point gets two buttons: **Show LEDs** and **Hide LEDs** (e.g. to dim blinking status LEDs overnight). Buttons are stateless actions — press them when you want them.
+Each physical access point has an **LEDs** switch that shows or hides its status LEDs (e.g. to dim blinking LEDs overnight):
 
 ```text
-button.ap_office_show_leds
-button.ap_office_hide_leds
+switch.ap_office_leds
 ```
+
+State reflects the AP's `led-off` setting. When it reads `*` (inherited from the AP group config), the switch shows **Unknown** until you toggle it explicitly.
 
 ### Access points
 

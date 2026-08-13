@@ -23,12 +23,13 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Ruckus Unleashed WLAN switches."""
+    """Set up Ruckus Unleashed WLAN and AP LED switches."""
     coordinator: RuckusDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
     known_wlan_ids: set[str] = set()
+    known_ap_serials: set[str] = set()
 
-    def _discover() -> None:
+    def _discover_wlans() -> None:
         """Add entities for any newly discovered WLANs."""
         wlans = coordinator.data.wlans if coordinator.data else []
         new_entities = [
@@ -47,9 +48,32 @@ async def async_setup_entry(
             ", ".join(e._attr_name for e in new_entities),
         )
 
-    _discover()
-    remove_discover_listener = coordinator.async_add_listener(_discover)
-    entry.async_on_unload(remove_discover_listener)
+    def _discover_ap_leds() -> None:
+        """Add entities for any newly discovered APs."""
+        aps = coordinator.data.aps if coordinator.data else []
+        new_entities = [
+            RuckusApLedSwitch(coordinator, ap)
+            for ap in aps
+            if ap.get("serial") not in known_ap_serials
+        ]
+        if not new_entities:
+            return
+        for ap in aps:
+            if serial := ap.get("serial"):
+                known_ap_serials.add(serial)
+        async_add_entities(new_entities)
+        _LOGGER.debug(
+            "Discovered %d new AP LED switch(es) across %d AP(s)",
+            len(new_entities),
+            len(known_ap_serials),
+        )
+
+    _discover_wlans()
+    _discover_ap_leds()
+    remove_wlan_listener = coordinator.async_add_listener(_discover_wlans)
+    remove_ap_led_listener = coordinator.async_add_listener(_discover_ap_leds)
+    entry.async_on_unload(remove_wlan_listener)
+    entry.async_on_unload(remove_ap_led_listener)
 
 
 class RuckusWlanSwitch(CoordinatorEntity[RuckusDataUpdateCoordinator], SwitchEntity):
@@ -121,3 +145,76 @@ class RuckusWlanSwitch(CoordinatorEntity[RuckusDataUpdateCoordinator], SwitchEnt
         if wlan is None:
             return
         await self.coordinator.async_disable_wlan(wlan["name"])
+
+
+class RuckusApLedSwitch(CoordinatorEntity[RuckusDataUpdateCoordinator], SwitchEntity):
+    """A switch controlling a single physical AP's LEDs."""
+
+    _attr_has_entity_name = True
+    _attr_name = "LEDs"
+
+    def __init__(
+        self,
+        coordinator: RuckusDataUpdateCoordinator,
+        ap: dict[str, Any],
+    ) -> None:
+        super().__init__(coordinator)
+        self._serial = ap["serial"]
+        self._mac = ap["mac"]
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_ap_led_{self._serial}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, self._serial)},
+        )
+
+    @property
+    def _ap(self) -> dict[str, Any] | None:
+        """Return the current AP data for this entity, if still present."""
+        return next(
+            (
+                ap
+                for ap in self.coordinator.data.aps
+                if ap.get("serial") == self._serial
+            ),
+            None,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return the LED state.
+
+        ``led-off`` is ``"false"`` when LEDs are visible, ``"true"`` when hidden,
+        and ``"*"`` when inherited from the AP group config (state unknown).
+        """
+        ap = self._ap
+        if ap is None:
+            return None
+        led_off = ap.get("led-off")
+        if led_off == "true":
+            return False
+        if led_off == "false":
+            return True
+        return None
+
+    @property
+    def available(self) -> bool:
+        """Report available only when the coordinator is healthy and the AP
+        is still present in the latest poll."""
+        return self.coordinator.last_update_success and self._ap is not None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Expose the raw led-off value for debugging."""
+        ap = self._ap or {}
+        return {"led_off": ap.get("led-off")}
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Show the AP's LEDs."""
+        if self._ap is None:
+            return
+        await self.coordinator.async_show_ap_leds(self._mac)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Hide the AP's LEDs."""
+        if self._ap is None:
+            return
+        await self.coordinator.async_hide_ap_leds(self._mac)

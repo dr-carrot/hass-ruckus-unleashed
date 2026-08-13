@@ -2,7 +2,7 @@
 
 DOMAIN = "hacs_ruckus_unleashed"
 
-PLATFORMS = ["switch", "button"]
+PLATFORMS = ["switch"]
 
 CONF_VERIFY_SSL = "verify_ssl"
 DEFAULT_VERIFY_SSL = True

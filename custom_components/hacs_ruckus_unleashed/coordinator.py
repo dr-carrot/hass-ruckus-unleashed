@@ -144,6 +144,13 @@ class RuckusDataUpdateCoordinator(DataUpdateCoordinator[RuckusData]):
             len(aps),
             len(wlans),
         )
+        for ap in aps:
+            _LOGGER.debug(
+                "AP serial=%s name=%s led-off=%r",
+                ap.get("serial"),
+                ap.get("devname") or ap.get("name"),
+                ap.get("led-off"),
+            )
         for wlan in wlans:
             _LOGGER.debug(
                 "WLAN id=%s name=%s enable-type=%r",
